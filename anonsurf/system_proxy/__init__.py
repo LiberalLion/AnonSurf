@@ -44,7 +44,7 @@ if sys.platform == 'win32':
 
 def set_windows_system_proxy(ip, port, enabled=True):
     if enabled:
-        setting = create_unicode_buffer("socks=" + ip + ":" + str(port))
+        setting = create_unicode_buffer(f"socks={ip}:{str(port)}")
     else:
         setting = create_unicode_buffer("")
 
