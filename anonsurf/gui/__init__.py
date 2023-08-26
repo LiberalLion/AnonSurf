@@ -91,14 +91,47 @@ def start_gui():
                 source=IMG_IDLE, time_between_frames=100,
             )
 
-        elif PROXY.running:
+        else:
             E_MAIN_IMAGE.update_animation(
                 source=IMG_RUNNING, time_between_frames=25,
             )
 
         if event == "key_button_start":
 
-            if not PROXY.running:
+            if PROXY.running:
+                E_MAIN_BUTTON_START.update(
+                    disabled=True,
+                    button_color=BUTTON_BOOTSTRAPPING_COLOR,
+                    disabled_button_color=BUTTON_BOOTSTRAPPING_COLOR,
+                )
+                EXECUTOR.submit(PROXY.stop)
+
+                x = 100
+                while x > 0 and not PROXY.exception:
+
+                    P_MAIN_WINDOW.read(50)
+
+                    x -= 5
+
+                    E_MAIN_PROGRESS_BAR.update_bar(x)
+
+                    E_MAIN_IMAGE.update_animation(
+                        source=IMG_IDLE, time_between_frames=50,
+                    )
+                    E_MAIN_BUTTON_START.update(text=f"Shutting down: {x}%")
+
+                system_proxy_isset = set_system_proxy(PROXY, False)
+
+                if system_proxy_isset:
+                    _status = "Disabled | click to enable"
+
+                E_MAIN_BUTTON_START.update(
+                    disabled=False,
+                    text="{0: ^30s}".format(_status),
+                    button_color=BUTTON_DISABLED_COLOR,
+                )
+
+            else:
                 # E_MAIN_BUTTON_START.update(disabled=True)
 
                 EXECUTOR.submit(PROXY.start)
@@ -133,48 +166,10 @@ def start_gui():
                 system_proxy_isset = set_system_proxy(PROXY, enabled=True)
 
                 _status = "Enabled | click to disable"
-
-                if system_proxy_isset:
-                    _status = "Enabled | click to disable"
-
                 E_MAIN_BUTTON_START.update(
                     disabled=False,
                     text="{0: ^30s}".format(f"{_status}"),
                     button_color=BUTTON_ENABLED_COLOR,
-                )
-
-            elif PROXY.running:
-
-                E_MAIN_BUTTON_START.update(
-                    disabled=True,
-                    button_color=BUTTON_BOOTSTRAPPING_COLOR,
-                    disabled_button_color=BUTTON_BOOTSTRAPPING_COLOR,
-                )
-                EXECUTOR.submit(PROXY.stop)
-
-                x = 100
-                while x > 0 and not PROXY.exception:
-
-                    P_MAIN_WINDOW.read(50)
-
-                    x -= 5
-
-                    E_MAIN_PROGRESS_BAR.update_bar(x)
-
-                    E_MAIN_IMAGE.update_animation(
-                        source=IMG_IDLE, time_between_frames=50,
-                    )
-                    E_MAIN_BUTTON_START.update(text=f"Shutting down: {x}%")
-
-                system_proxy_isset = set_system_proxy(PROXY, False)
-
-                if system_proxy_isset:
-                    _status = "Disabled | click to enable"
-
-                E_MAIN_BUTTON_START.update(
-                    disabled=False,
-                    text="{0: ^30s}".format(_status),
-                    button_color=BUTTON_DISABLED_COLOR,
                 )
 
     P_MAIN_WINDOW.close()
